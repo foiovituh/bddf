@@ -2,15 +2,14 @@
 readonly EXECUTION_PATH="$(dirname "$0")";
 
 print_broken_dynamic_dependencies() {
-    dynamic_dependencies="$(ldd "$(which "$1")")";
-    broken_dependencies="$(echo "$dynamic_dependencies" \
-      | grep "not found" \
-      | cut -d ' ' -f 1)";
-    
-    if [[ ! -z "$broken_dependencies" ]]; then
-      printf "%s:\n" "$1";
-      printf "  - %s\n" ${broken_dependencies##* };
-    fi
+  local default_message="\"has no broken dependencies\"";
+  local dynamic_dependencies="$(ldd "$(which "$1")")";
+  local broken_dependencies="$(echo "$dynamic_dependencies" \
+    | grep "not found" \
+    | cut -d ' ' -f 1)";
+
+  printf "%s:\n" "$1";
+  printf "  - %s\n" ${broken_dependencies:-"$default_message"};
 }
 
 case "$1" in
