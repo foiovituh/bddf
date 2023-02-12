@@ -1,0 +1,17 @@
+bddf.sh [type of search] [command name or dependencies file]
+
+DESCRIPTION:
+  Broken Dynamic Dependencies Finder
+
+TYPE_OF_SEARCH:
+  -u (unique command)
+  -d (dependencies file)
+
+EXAMPLES:
+  bddf.sh -u ls
+  bddf.sh -d /home/you/project/dependencies.txt
+
+  DEPENDENCIES_TXT_CONTENT:
+    jq
+    figlet
+    compton
