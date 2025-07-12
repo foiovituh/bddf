@@ -1,35 +1,87 @@
 #!/bin/bash
-readonly EXECUTION_PATH="$(dirname "$0")";
-readonly HELP_MESSAGE="$(< "${EXECUTION_PATH}/documentation/HELP.txt")";
+readonly VERSION='1.0.0'
+readonly TRY_HELP_COMMAND="try 'bddf -h' for more information."
 
-show_help_message() {
-  printf "%s\n" "$HELP_MESSAGE";
-  exit;
+echo_and_exit() {
+  echo -e "$1"
+  exit "$2"
 }
 
-print_broken_dynamic_dependencies() {
-  local default_message="\"has no broken dependencies\"";
-  local dynamic_dependencies="$(ldd "$(which "$1")")";
+warn() {
+  echo_and_exit "${1}!\n$TRY_HELP_COMMAND" 1
+}
+
+show_help() {
+  cat <<EOF
+bddf.sh [type of search] [binary name or dependencies file path]
+
+DESCRIPTION:
+  checks if system commands have missing shared libraries (.so files).
+  useful to detect broken dynamic dependencies via ldd.
+
+TYPE_OF_SEARCH:
+  -b <binary_name>          binary name to check
+  -d <dependencies_file>    file that contains a list of binaries to check
+
+EXAMPLES:
+  bddf.sh -b compton
+  bddf.sh -d /home/user/project/dependencies.txt
+
+  DEPENDENCIES_TXT_CONTENT:
+    jq
+    figlet
+    compton
+
+AUTHOR:
+  vituh                     <foiovituh@outlook.com>
+  gitHub:                   https://github.com/foiovituh
+EOF
+  exit 0 
+}
+
+check() {
+  local binary_path="$(which "$1" 2>/dev/null)"
+
+  if [[ -z "$binary_path" ]]; then
+    warn "${1}: command not found"
+  fi
+
+  if [[ ! -f "$binary_path" ]]; then
+    warn "${1}: '$binary_path' is not a regular file"
+  fi
+  
+  local dynamic_dependencies="$(ldd "$binary_path" 2>/dev/null)";
   local broken_dependencies="$(cut -d ' ' -f 1 \
-    <<< "$(grep 'not found' <<< "${dynamic_dependencies}")")";
+    <<< "$(grep 'not found' <<< "$dynamic_dependencies")")"
 
-  printf "%s:\n" "$1";
-  printf "  - %s\n" ${broken_dependencies:-"$default_message"};
+  echo "${1}:"
+
+  if [ -z "$broken_dependencies" ]; then
+    echo '  - no broken dependencies found'
+  else
+    for dep in $broken_dependencies; do
+      echo "  - ${dep}"
+    done
+  fi
 }
 
-[[ $# -ne 2 ]] && show_help_message;
+if [[ $# -eq 0 ]]; then
+  echo_and_exit "$TRY_HELP_COMMAND" 0
+fi
 
-case "$1" in
-  "-u")
-    print_broken_dynamic_dependencies "$2";
-    ;;
-  "-d")
-    dependencies="$(< "$2")";
-    for dependencie in $dependencies; do
-      print_broken_dynamic_dependencies "$dependencie";
-    done
-    ;;
-  *)
-    show_help_message;
-    ;;
-esac
+while getopts ":b:d:vh" opt; do
+  case "$opt" in
+    u) check "$OPTARG" ;;
+    d)
+      dependencies="$(< "$OPTARG")";
+
+      for dependencie in $dependencies; do
+        check "$dependencie";
+      done
+      ;;
+    v) echo_and_exit "bddf version ${VERSION}" 0 ;;
+    h) show_help ;;
+    \?) warn "invalid option: -${OPTARG}" ;;
+    :) warn "the (-${OPTARG}) option requires argument" ;;
+  esac
+done
