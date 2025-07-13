@@ -25,7 +25,7 @@ sudo ln -s "$PWD/bddf.sh" /usr/local/bin/bddf
 ## 🚀 Usage
 ### Command syntax :
 ```bash
-bddf.sh [type of search] [binary name or dependencies file path]
+bddf [type of search] [binary name or dependencies file path]
 ```
 
 ### Type of search:
@@ -43,7 +43,7 @@ bddf.sh [type of search] [binary name or dependencies file path]
 ### Examples:
 - Only one binary to check:
 ```bash
-bddf.sh -b compton
+bddf -b compton
 ```
 
 - Check multiple binaries from a file:
@@ -53,7 +53,7 @@ bddf.sh -b compton
 # figlet
 # compton
 
-bddf.sh -d /home/user/project/dependencies.txt
+bddf -d /home/user/project/dependencies.txt
 ```
 
 ## ⭐ Support the Project
