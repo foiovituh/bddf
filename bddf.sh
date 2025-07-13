@@ -13,7 +13,7 @@ warn() {
 
 show_help() {
   cat <<EOF
-bddf.sh [type of search] [binary name or dependencies file path]
+bddf [type of search] [binary name or dependencies file path]
 
 DESCRIPTION:
   checks if system commands have missing shared libraries (.so files).
@@ -24,8 +24,8 @@ TYPE_OF_SEARCH:
   -d <dependencies_file>    file that contains a list of binaries to check
 
 EXAMPLES:
-  bddf.sh -b compton
-  bddf.sh -d /home/user/project/dependencies.txt
+  bddf -b compton
+  bddf -d /home/user/project/dependencies.txt
 
   DEPENDENCIES_TXT_CONTENT:
     jq
